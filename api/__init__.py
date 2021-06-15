@@ -226,7 +226,7 @@ def edit_post():
     requested_post.img_url = form.img_url.data
     requested_post.body = form.body.data
     db.session.commit()
-    return jsonify(success="success")
+    return jsonify(success="success", id=requested_post.id)
 
 
 @api.route("post/can-edit/<int:id>")
