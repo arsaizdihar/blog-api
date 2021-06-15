@@ -281,3 +281,10 @@ def contact():
     db.session.add(new_contact)
     db.session.commit()
     return jsonify(success="Message sent successfully.")
+
+
+@api.route("/check-admin")
+@cross_origin()
+@jwt_required()
+def api_check_admin():
+    return jsonify(is_admin=check_admin())
