@@ -12,24 +12,11 @@ from flask_cors import cross_origin
 from models import db, User, BlogPost, Comment, Contact
 from forms import RegisterForm, LoginForm, CommentForm, ContactForm, CreatePostForm
 from datetime import datetime, timedelta
+from util import get_jkt_timezone, row2dict
 import re
 import os
 
 api = Blueprint("api", __name__)
-
-
-def get_jkt_timezone():
-    utc = datetime.utcnow()
-    return utc + timedelta(hours=7)
-
-
-def row2dict(row, hidden_column=[]):
-    d = {}
-    for column in row.__table__.columns:
-        if column.name not in hidden_column:
-            d[column.name] = str(getattr(row, column.name))
-
-    return d
 
 
 def check_admin():
@@ -140,6 +127,7 @@ def get_all_posts():
     posts = BlogPost.query.order_by(BlogPost.id.desc()).all()
     if posts:
         del posts[-1]
+    print(current_user)
     if not check_admin():
         posts = [post for post in posts if not post.hidden]
     posts_list = []

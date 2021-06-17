@@ -94,6 +94,9 @@ class ChatRoom(db.Model):
             return f"<ChatRoom {self.name}>"
         return f"<ChatRoom {self.id}>"
 
+    def get_dict(self):
+        return {"id": self.id, "name": self.name, "last_modified": last_modified}
+
 
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"

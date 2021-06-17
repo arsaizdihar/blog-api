@@ -13,6 +13,10 @@ class BaseConfig:
         "DATABASE_URL", "sqlite:///" + os.path.join(BASE_DIR, "blog.db")
     )
 
+    if os.path.exists("db.txt"):
+        with open("db.txt", "r") as file:
+            SQLALCHEMY_DATABASE_URI = file.read()
+
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     DATABASE_CONNECT_OPTIONS = {}
 
