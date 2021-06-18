@@ -86,9 +86,9 @@ def on_message(data):
             "time": get_timestamp(),
             "id": request.sid,
         },
-        room=int(room_id),
+        room=room_id,
     )
-    notify_chat(socketio, room_id)
+    notify_chat(socketio, int(room_id))
     # for assoc in chat_room.members:
     #     if not assoc.member == current_user:
     #         if not assoc.member.is_online and not assoc.is_to_email:
