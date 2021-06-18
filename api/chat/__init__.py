@@ -49,7 +49,7 @@ def socket_connect():
         message = f"{current_user.name} connected at {get_timestamp()}"
         chat = Chat(message=message, user_id=2, room_id=1)
         db.session.add(chat)
-        emit("message", {"msg": message, "time_stamp": get_timestamp()}, room=1)
+        emit("message", {"msg": message, "time_stamp": get_timestamp()}, room="1")
     emit("socket_id", request.sid)
     db.session.commit()
 
@@ -86,7 +86,7 @@ def on_message(data):
             "time": get_timestamp(),
             "id": request.sid,
         },
-        room=room_id,
+        room=int(room_id),
     )
     notify_chat(socketio, room_id)
     # for assoc in chat_room.members:
