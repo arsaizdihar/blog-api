@@ -70,7 +70,7 @@ def on_message(data):
     user = get_user_from_sid(request.sid)
     msg = escape_input(data["msg"])
     username = user.name
-    room_id = data["room"]["room_id"]
+    room_id = str(data["room"]["room_id"])
 
     chat_room = ChatRoom.query.get(room_id)
     chat = Chat(message=msg, time=get_timestamp(), user=user, room=chat_room)
@@ -116,10 +116,9 @@ def read_callback(data):
 def on_join(data):
     """User joins a room"""
     user_id = get_user_id(request.sid)
-    room_id = data["room_id"]
+    room_id = str(data["room_id"])
     join_room(room_id)
     room = ChatRoom.query.get(room_id)
-    print(user_id, "joined", room.name)
     assoc = RoomRead.query.filter_by(user_id=user_id, room_id=room_id).first()
     assoc.is_read = True
     assoc.last_read = get_timestamp()
@@ -151,7 +150,7 @@ def on_join(data):
 @socketio.on("leave")
 def on_leave(data):
     """User leaves a room"""
-    room_id = data["room_id"]
+    room_id = str(data["room_id"])
     leave_room(room_id)
     # print(data)
 
