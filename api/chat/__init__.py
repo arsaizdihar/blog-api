@@ -49,7 +49,7 @@ def socket_connect():
         message = f"{current_user.name} connected at {get_timestamp()}"
         chat = Chat(message=message, user_id=2, room_id=1)
         db.session.add(chat)
-        send({"msg": message, "time_stamp": get_timestamp()}, room=1)
+        emit("message", {"msg": message, "time_stamp": get_timestamp()}, room=1)
     emit("socket_id", request.sid)
     db.session.commit()
 
@@ -78,7 +78,8 @@ def on_message(data):
     for assoc in chat_room.members:
         assoc.is_read = assoc.user_id == user.id
     db.session.add(chat)
-    send(
+    emit(
+        "message",
         {
             "username": username,
             "msg": msg,
@@ -118,6 +119,7 @@ def on_join(data):
     room_id = data["room_id"]
     join_room(room_id)
     room = ChatRoom.query.get(room_id)
+    print(user_id, "joined", room.name)
     assoc = RoomRead.query.filter_by(user_id=user_id, room_id=room_id).first()
     assoc.is_read = True
     assoc.last_read = get_timestamp()
