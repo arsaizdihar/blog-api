@@ -225,7 +225,7 @@ def post_can_edit(id):
     if not requested_post:
         return jsonify(error="No post found"), HTTPStatus.BAD_REQUEST
     if not requested_post.author == current_user:
-        return jsonify(error="no access to edit post"), HTTPStatus.UNAUTHORIZED
+        return jsonify(success=False)
     return jsonify(success=True)
 
 
