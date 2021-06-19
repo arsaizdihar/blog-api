@@ -16,7 +16,7 @@ import io
 socketio = SocketIO(cors_allowed_origins="*")
 
 
-@socketio.on("connect")
+@socketio.on("connect", namespace="/chat")
 @jwt_required()
 def socket_connect():
     current_user.is_online = True
@@ -54,7 +54,7 @@ def socket_connect():
     db.session.commit()
 
 
-@socketio.on("disconnect")
+@socketio.on("disconnect", namespace="/chat")
 def socket_disconnect():
     user = get_user_from_sid(request.sid)
     if user:
@@ -64,7 +64,7 @@ def socket_disconnect():
         print(user.name, "disconnected.")
 
 
-@socketio.on("message")
+@socketio.on("message", namespace="/chat")
 def on_message(data):
     """Broadcast messages"""
     user = get_user_from_sid(request.sid)
@@ -102,7 +102,7 @@ def on_message(data):
     db.session.commit()
 
 
-@socketio.on("read")
+@socketio.on("read", namespace="/chat")
 def read_callback(data):
     assoc = RoomRead.query.filter_by(
         room_id=data, user_id=get_user_id(request.sid)
@@ -112,7 +112,7 @@ def read_callback(data):
     db.session.commit()
 
 
-@socketio.on("join")
+@socketio.on("join", namespace="/chat")
 def on_join(data):
     """User joins a room"""
     user_id = get_user_id(request.sid)
@@ -147,7 +147,7 @@ def on_join(data):
     emit("show_history", {"chats": chat_list})
 
 
-@socketio.on("leave")
+@socketio.on("leave", namespace="/chat")
 def on_leave(data):
     """User leaves a room"""
     room_id = str(data["room_id"])
@@ -155,6 +155,51 @@ def on_leave(data):
     # print(data)
 
 
-@socketio.on("upload-img")
+@socketio.on("upload-img", namespace="/chat")
 def upload_image(data):
     print(data)
+
+
+@socketio.on("connect", namespace="/call")
+@jwt_required()
+def connect_call():
+    print(current_user.name, "connected to call")
+    add_call_user(request.sid, current_user.id)
+    emit("socket_id", request.sid)
+    friends_online = get_call_friends_online(request.sid)
+    emit("friends_online", friends_online)
+    for friend in get_call_friends_online(request.sid):
+        emit(
+            "friend_online",
+            {"sid": request.sid, "name": current_user.name},
+            room=friend["sid"],
+        )
+
+
+@socketio.on("call_user", namespace="/call")
+def socket_call_user(data):
+    user = get_call_user(request.sid)
+    emit(
+        "call_user",
+        {"from": request.sid, "name": user.name, "signal": data["signal"]},
+        room=data["user_to_call"],
+    )
+
+
+@socketio.on("answer_call", namespace="/call")
+def socket_answer_call(data):
+    print("answered")
+    emit("call_accepted", data["signal"], room=data["to"])
+
+
+@socketio.on("disconnect", namespace="/call")
+def disconnect_call():
+    friends_online = get_call_friends_online(request.sid)
+    for friend in friends_online:
+        emit("friend_offline", request.sid, room=friend["sid"])
+    remove_call_user(request.sid)
+
+
+@socketio.on("leave_call", namespace="/call")
+def leave_call(data):
+    emit("leave_call", room=data)

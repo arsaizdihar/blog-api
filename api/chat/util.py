@@ -5,6 +5,7 @@ import io
 import math
 
 socket_users = {}
+call_users = {}
 
 
 def add_socket_user(sid, user_id):
@@ -23,6 +24,65 @@ def get_user_id(sid):
 def remove_socket_user(sid):
     try:
         del socket_users[sid]
+    except KeyError:
+        return
+
+
+def add_call_user(sid, user_id):
+    call_users_copy = call_users.copy()
+    for other_sid, user in call_users_copy.items():
+        if user["id"] == user_id:
+            del call_users[other_sid]
+    call_users[sid] = {
+        "id": user_id,
+        "is_call": False,
+        "call_id": None,
+        "is_answered": False,
+    }
+
+
+def get_call_user(sid):
+    return User.query.get(call_users.get(sid)["id"])
+
+
+def get_call_user_id(sid):
+    return call_users.get(sid)["id"]
+
+
+def set_user_call_to(sid, call_id):
+    user = call_users.get(sid)
+    if user:
+        user["is_call"] = True
+        user["call_id"] = False
+
+
+def set_answer_call(sid, call_id):
+    user1 = call_users.get(sid)
+    user2 = call_users.get(call_id)
+    if user1:
+        user1["is_answered"] = True
+    if user2:
+        user2["is_answered"] = True
+
+
+def get_call_friends_online(sid):
+    try:
+        call_users_copy = call_users.copy()
+        user = User.query.get(call_users[sid]["id"])
+        friends_online = []
+        for other_sid, user_data in call_users_copy.items():
+            if other_sid != sid:
+                other_user = User.query.get(user_data["id"])
+                if other_user in user.friends:
+                    friends_online.append({"name": other_user.name, "sid": other_sid})
+        return friends_online
+    except KeyError:
+        return []
+
+
+def remove_call_user(sid):
+    try:
+        del call_users[sid]
     except KeyError:
         return
 
