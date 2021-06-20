@@ -6,6 +6,7 @@ import math
 
 socket_users = {}
 call_users = {}
+group_calls = {}
 
 
 def add_socket_user(sid, user_id):
@@ -78,6 +79,50 @@ def get_call_friends_online(sid):
         return friends_online
     except KeyError:
         return []
+
+
+def join_group_call(sid, group_name):
+    if not group_name in group_calls:
+        group_calls[group_name] = [sid]
+        return []
+    other_members = group_calls[group_name]
+    result = other_members.copy()
+    other_members.append(sid)
+    return result
+
+
+def leave_group_call(sid, group_name):
+    members = group_calls.get(group_name)
+    if members:
+        if sid in members:
+            members.remove(sid)
+            if len(members) == 0:
+                del group_calls[group_name]
+
+
+# def make_group_call_room(sid, username, signal, group_name):
+#     if group_name in group_calls:
+#         return False
+#     group_calls[group_name] = [(sid, username, signal)]
+#     return True
+
+
+# def join_group_call(sid, username, signal, group_name):
+#     if group_name not in group_calls:
+#         return []
+#     other_members = group_calls[group_name]
+#     result = other_members.copy()
+#     other_members.append((sid, username, signal))
+#     return result
+
+
+# def leave_group_call(sid, group_name):
+#     if group_name not in group_calls:
+#         return
+#     removed_list = list(
+#         filter(lambda member: member[0] != sid, group_calls["group_name"])
+#     )
+#     group_calls["group_name"] = removed_list
 
 
 def remove_call_user(sid):
