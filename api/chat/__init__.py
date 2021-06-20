@@ -282,9 +282,9 @@ def sending_signal(data):
 
 
 @socketio.on("returning_signal", namespace="/groupcall")
-def return_sigal(data):
+def return_signal(data):
     emit(
         "receiving_signal",
         {"signal": data["signal"], "sid": request.sid},
-        room=data["called_sid"],
+        room=data["caller_sid"],
     )
